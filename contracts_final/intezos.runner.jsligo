@@ -1,0 +1,92 @@
+#import "./storage.types.jsligo" "Storage"
+#import "./utils.jsligo" "Utils"
+#include "./intezos.jsligo"
+
+const default_timestamp: timestamp = "2000-01-01t10:10:10Z" as timestamp;
+
+const default_timestamp2: timestamp = "2001-01-01t10:10:10Z" as timestamp;
+
+const bad_timestamp: timestamp = "1900-01-01t10:10:10Z" as timestamp;
+
+const default_sender: Storage.sender = "tz1VzmEExaxq91epJGzVmsdRZ14BVS54sLba" as address;
+
+const default_receiver: Storage.receiver = "tz1Yj4FviaKEy6ER8ZDeiH2w2Lx8bapjuJEq" as address;
+
+const unknow_address: Storage.receiver = "tz1Yj4FviaKEy6ER8ZDeiH2w2Lx8bapjuJEc" as address;
+
+const default_answer = "Yes"
+
+const default_encrypted_answer = Utils.pack_and_encrypt(default_answer);
+
+export const default_transfer_parameter: transfer_parameter =
+  {
+    receiver: default_receiver,
+    reason: "Because that's the default test",
+    secret: {
+      question: "Is it your first intezos ?",
+      encrypted_answer: default_encrypted_answer,
+      encryption_algorithm: "sha256"
+    }
+  };
+
+export const default_claim_parameter: claim_parameter =
+  { sender: default_sender, transfer_timestamp: default_timestamp, answer: Bytes.pack(default_answer) };
+
+export const bad_answer_claim_parameter: claim_parameter =
+  { sender: default_sender, transfer_timestamp: default_timestamp, answer: Bytes.pack("No") };
+
+export const unknow_sender_claim_parameter: claim_parameter =
+  { sender: unknow_address, transfer_timestamp: default_timestamp, answer: Bytes.pack(default_answer) };
+
+export const bad_timestamp_claim_parameter: claim_parameter =
+  { sender: default_sender, transfer_timestamp: bad_timestamp, answer: Bytes.pack(default_answer) };
+
+export const default_redeem_parameter: redeem_parameter = { receiver: default_receiver, transfer_timestamp: default_timestamp };
+
+export const unknow_receiver_parameter: redeem_parameter = { receiver: unknow_address, transfer_timestamp: default_timestamp };
+
+export const bad_timestamp_parameter: redeem_parameter = { receiver: default_receiver, transfer_timestamp: bad_timestamp };  
+
+const default_pending_transfer_key = { sender: default_sender, receiver: default_receiver, transfer_timestamp: default_timestamp } 
+
+const default_pending_transfer = {   
+  amount: 100 as mutez,
+  secret: {
+      question: "Is it the default pending transfer ? ",
+      encrypted_answer: default_encrypted_answer,
+      encryption_algorithm: "sha256"
+    } ,
+  reason: "Pending Transfer from default Storage",
+  pending: true
+} 
+
+const default_accepted_transfer_key =
+  { sender: default_sender, receiver: default_receiver, transfer_timestamp: default_timestamp2 };
+
+const default_accepted_transfer =
+  {
+    amount: 500 as mutez,
+    secret: {
+      question: "Is it the default accepted transfer ?",
+      encrypted_answer: default_encrypted_answer,
+      encryption_algorithm: "sha256"
+    },
+    reason: "Accepted Transfer from default Storage",
+    pending: false
+  }; 
+
+export const default_test_storage: Storage.t =
+  {
+    transfer_ledger: Big_map.literal (list([
+      [default_pending_transfer_key, default_pending_transfer],
+      [default_accepted_transfer_key, default_accepted_transfer]
+    ]))
+  };
+
+export const empty_test_storage: Storage.t = {
+  transfer_ledger: Big_map.literal(
+    list(
+      []
+    )
+  ),
+};

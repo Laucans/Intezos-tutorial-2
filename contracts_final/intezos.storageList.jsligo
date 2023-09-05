@@ -1,0 +1,4 @@
+#include "intezos.jsligo"
+
+export const default_storage: Storage.t =
+  { transfer_ledger: Big_map.empty };

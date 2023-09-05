@@ -1,0 +1,26 @@
+export type sender = address;
+
+export type receiver = address;
+
+export type secret = {
+  question: string,
+  encrypted_answer: bytes,
+  encryption_algorithm: string
+};
+
+export type transfer_key = {
+  sender,
+  receiver,
+  transfer_timestamp: timestamp
+};
+
+export type transfer = {
+  amount: tez,
+  secret,
+  reason: string,
+  pending: bool
+};
+
+export type t = {
+  transfer_ledger: big_map<transfer_key, transfer>,
+};

@@ -1,0 +1,7 @@
+.DS_Store
+artifacts
+_esy
+.ligo
+.taq/*-state.json
+.taq/config.local.*.json
+node_modules/

@@ -1,0 +1,88 @@
+#import "./storage.types.jsligo" "Storage"
+#import "./utils.jsligo" "Utils"
+
+export type transfer_parameter = {
+  receiver: Storage.receiver,
+  reason: string,
+  secret: Storage.secret
+};
+
+@entry
+const transfer = (parameter: transfer_parameter, store: Storage.t) => {
+  const transaction_amount = Tezos.get_amount();
+  assert_with_error((transaction_amount > (0 as mutez)), "You have to send tokens to initiate a transaction");
+  assert_with_error(
+    (parameter.secret.question != "" && parameter.secret.encrypted_answer != Bytes.pack("")),
+    "Question/answer are mandatory"
+  );
+  const _ = Utils.check_wallet_validity(parameter.receiver);
+
+  const transfer_key: Storage.transfer_key =
+    { sender: Tezos.get_source(), receiver: parameter.receiver, transfer_timestamp: Tezos.get_now() };
+
+  const transfer: Storage.transfer =
+    { amount: transaction_amount, secret: parameter.secret, reason: parameter.reason, pending: true };
+
+  const updated_ledger =
+    Big_map.update(
+      transfer_key,
+      Some(transfer),
+      store.transfer_ledger
+    );
+
+  return [
+    list([]) as list<operation>,
+    { transfer_ledger: updated_ledger }
+  ]
+};
+
+export type claim_parameter = {
+  sender: Storage.sender,
+  transfer_timestamp: timestamp,
+  answer: bytes
+};
+
+@entry
+const claim = (parameter: claim_parameter, store: Storage.t): [list<operation>, Storage.t] => {
+  const transfer_to_claim_key =
+    { sender: parameter.sender, receiver: Tezos.get_source(), transfer_timestamp: parameter.transfer_timestamp };
+  const transfer_to_claim = Utils.get_transfer_from_storage(transfer_to_claim_key, store);
+  assert_with_error(
+    transfer_to_claim.pending && Utils.encrypt(parameter.answer) == transfer_to_claim.secret.encrypted_answer, "Failed to claim the transfer"
+  );
+  const transferOperation: operation =
+    Tezos.transaction(unit, transfer_to_claim.amount, Tezos.get_contract_with_error(Tezos.get_source(), "Not an existing address"));
+  const updated_ledger =
+    Big_map.update(
+      transfer_to_claim_key,
+      Some({ ...transfer_to_claim, pending: false }),
+      store.transfer_ledger
+    );
+  return [list([transferOperation]), { transfer_ledger: updated_ledger }]
+};
+
+export type redeem_parameter = {
+  receiver: Storage.receiver,
+  transfer_timestamp: timestamp
+};
+
+@entry
+const redeem = (parameter: redeem_parameter, store: Storage.t) => {
+  const transfer_to_redeem_key =
+    { sender: Tezos.get_source(), receiver: parameter.receiver, transfer_timestamp: parameter.transfer_timestamp };
+  const transfer_to_redeem = Utils.get_transfer_from_storage(transfer_to_redeem_key, store);
+  assert(transfer_to_redeem.pending);
+  const transfer_operation =
+    Tezos.transaction(
+      unit,
+      transfer_to_redeem.amount,
+      Tezos.get_contract_with_error(Tezos.get_source(), "Not an existing address")
+    );
+  const updated_ledger =
+    Big_map.update(
+      transfer_to_redeem_key,
+      Some({ ...transfer_to_redeem, pending: false }),
+      store.transfer_ledger
+    );
+  return [list([transfer_operation]), { transfer_ledger: updated_ledger }]
+};

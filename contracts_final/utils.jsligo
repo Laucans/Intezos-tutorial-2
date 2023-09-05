@@ -1,0 +1,17 @@
+#import "./storage.types.jsligo" "Storage"
+export const pack_and_encrypt = (value) => Crypto.sha256(Bytes.pack(value));
+
+export const encrypt = (value) => Crypto.sha256(value);
+
+export const check_wallet_validity = (address: address) => {
+  const _ : contract<unit> = Tezos.get_contract_with_error(address, "Not an existing address");
+  return true
+};
+
+export const get_transfer_from_storage = (key: Storage.transfer_key, store: Storage.t) => {
+  return match(Big_map.find_opt(key, store.transfer_ledger))
+    {
+      when(None()) : failwith("Transfer doesn't exist")
+      when(Some (transfer)): transfer
+    }
+};
