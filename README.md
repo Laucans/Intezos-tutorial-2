@@ -219,4 +219,4 @@ Last step is create the tezos `transaction` which gonna be returned to the chain
 The redeem doesn't introduce new concepts you can try to do it alone or check one solution in `contracts_final` folder.
 
 # Next 
-Congrats ! The next step will be to integrate it into your first dApp
+Congrats ! The next step will be to integrate it into your first dApp https://github.com/Laucans/Intezos-tutorial-3
