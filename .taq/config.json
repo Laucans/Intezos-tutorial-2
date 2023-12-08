@@ -39,9 +39,7 @@
     "environments": {
         "development": {
             "type": "flextesa",
-            "label": "Local Tezos Sandbox",
-            "rpcUrl": "https://ghostnet.ecadinfra.com"
-
+            "label": "Local Tezos Sandbox"
         },
         "testing": {
             "type": "simple",
@@ -62,10 +60,6 @@
         {
             "type": "npm",
             "name": "@taqueria/plugin-taquito"
-        },
-        {
-            "type": "npm",
-            "name": "@taqueria/plugin-tezos-client"
         }
     ]
 }
